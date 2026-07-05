@@ -4,17 +4,25 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
-  // Admin user
-  const hash = await bcrypt.hash("shahin@admin123", 10);
-  await prisma.admin.upsert({
-    where: { email: "shahinmohamed411@gmail.com" },
-    update: {},
-    create: {
-      email: "shahinmohamed411@gmail.com",
-      password: hash,
-      name: "Mohamed Shahin M",
-    },
-  });
+  // Admin user — password comes from an env var, never hardcoded.
+  // Set ADMIN_EMAIL and ADMIN_PASSWORD before running the seed, e.g.:
+  //   ADMIN_EMAIL=you@example.com ADMIN_PASSWORD=yourStrongPassword npx tsx prisma/seed.ts
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (adminEmail && adminPassword) {
+    const hash = await bcrypt.hash(adminPassword, 10);
+    await prisma.admin.upsert({
+      where: { email: adminEmail },
+      update: {},
+      create: {
+        email: adminEmail,
+        password: hash,
+        name: "Mohamed Shahin M",
+      },
+    });
+  } else {
+    console.log("Skipping admin seed — set ADMIN_EMAIL and ADMIN_PASSWORD to create the admin user.");
+  }
 
   // Profile
   await prisma.profile.upsert({

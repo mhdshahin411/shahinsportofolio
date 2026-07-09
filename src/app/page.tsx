@@ -3,12 +3,8 @@ import Hero from "@/components/Hero";
 import Reveal from "@/components/Reveal";
 import SkillScroller from "@/components/SkillScroller";
 import ProjectCardThumb from "@/components/ProjectCardThumb";
-import {
-  MailIcon,
-  PhoneIcon,
-  LinkedInIcon,
-  ArrowIcon,
-} from "@/components/icons";
+import Footer from "@/components/Footer";
+import { MailIcon, PhoneIcon, ArrowIcon } from "@/components/icons";
 import {
   getProfile,
   getMarqueeSkills,
@@ -385,20 +381,7 @@ export default async function Home() {
         </section>
 
         {/* Footer */}
-        <footer className="border-t border-white/30 bg-white/20 backdrop-blur-md">
-          <div className="mono mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-10 text-xs uppercase tracking-wider text-faint sm:flex-row sm:px-6">
-            <p>Mohamed Shahin M</p>
-            <a
-              href={profile.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 transition-colors hover:text-accent"
-            >
-              <LinkedInIcon width={14} height={14} /> LinkedIn
-            </a>
-            <p>© 2020 — Built with Next.js</p>
-          </div>
-        </footer>
+        <Footer />
       </main>
     </>
   );

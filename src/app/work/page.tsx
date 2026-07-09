@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Reveal from "@/components/Reveal";
 import ProjectCardThumb from "@/components/ProjectCardThumb";
+import Footer from "@/components/Footer";
 import { ArrowIcon } from "@/components/icons";
 import { getProjects } from "@/lib/db-data";
 
@@ -113,12 +114,7 @@ export default async function WorkPage() {
         </section>
       </main>
 
-      <footer className="border-t border-white/30 bg-white/20 backdrop-blur-md">
-        <div className="mono mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-10 text-xs uppercase tracking-wider text-faint sm:flex-row sm:px-6">
-          <p>Mohamed Shahin M</p>
-          <p>© 2020 — Built with Next.js</p>
-        </div>
-      </footer>
+      <Footer />
     </>
   );
 }

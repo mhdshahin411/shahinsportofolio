@@ -23,8 +23,8 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ["400", "500"],
 });
 
-// Update this to your real domain before deploying — OG/canonical URLs resolve against it.
-const siteUrl = "https://mohamed-shahin.vercel.app";
+// Canonical/OG/metadata base URL.
+const siteUrl = "https://mohamedshahinm.online";
 const title = "Mohamed Shahin M — Full-Stack Developer & Dynamics 365 CRM";
 const description =
   "Freelance full-stack developer working across Microsoft Dynamics 365 CRM, the Power Platform, and full-stack web & mobile development with React, Node.js, and Flutter.";

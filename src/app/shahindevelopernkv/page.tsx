@@ -12,6 +12,16 @@ const sections = [
     description: "Manage your personal info, bio, and social links.",
   },
   {
+    label: "Stats",
+    href: "/shahindevelopernkv/stats",
+    description: "Edit the About numbers (years, projects, etc.).",
+  },
+  {
+    label: "Services",
+    href: "/shahindevelopernkv/services",
+    description: "Manage the service list shown in About.",
+  },
+  {
     label: "Experience",
     href: "/shahindevelopernkv/experience",
     description: "Add or edit your work experience entries.",

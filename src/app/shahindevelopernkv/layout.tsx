@@ -8,6 +8,8 @@ import { SessionProvider, signOut } from "next-auth/react";
 const navLinks = [
   { label: "Dashboard", href: "/shahindevelopernkv" },
   { label: "Profile", href: "/shahindevelopernkv/profile" },
+  { label: "Stats", href: "/shahindevelopernkv/stats" },
+  { label: "Services", href: "/shahindevelopernkv/services" },
   { label: "Experience", href: "/shahindevelopernkv/experience" },
   { label: "Projects", href: "/shahindevelopernkv/projects" },
   { label: "Skills", href: "/shahindevelopernkv/skills" },

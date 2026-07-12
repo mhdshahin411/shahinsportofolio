@@ -3,6 +3,7 @@
 import { useState, FormEvent } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { Spinner, inputCls } from "@/components/admin/ui";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -15,101 +16,40 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
-
     try {
-      const res = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
-
+      const res = await signIn("credentials", { email, password, redirect: false });
       if (!res || res.error) {
         setError("Invalid email or password.");
+        setLoading(false);
       } else {
         router.push("/shahindevelopernkv");
       }
     } catch {
       setError("Something went wrong. Please try again.");
-    } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        backgroundColor: "#0f1219",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontFamily: "var(--font-sans, 'DM Sans', sans-serif)",
-        padding: "1rem",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "400px",
-          backgroundColor: "#1a1f2e",
-          borderRadius: "12px",
-          padding: "2.5rem 2rem",
-          boxShadow: "0 4px 24px rgba(0, 0, 0, 0.4)",
-        }}
-      >
-        <h1
-          style={{
-            fontFamily: "var(--font-display, 'Space Grotesk', sans-serif)",
-            fontSize: "1.75rem",
-            fontWeight: 700,
-            color: "#ffffff",
-            textAlign: "center",
-            marginTop: 0,
-            marginBottom: "0.5rem",
-          }}
-        >
-          Admin Login
-        </h1>
-
-        <div
-          style={{
-            width: "48px",
-            height: "3px",
-            backgroundColor: "#16a34a",
-            margin: "0 auto 2rem",
-            borderRadius: "2px",
-          }}
-        />
+    <div className="flex min-h-screen items-center justify-center bg-[#f5f5f4] px-4">
+      <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
+        <div className="text-center">
+          <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold tracking-tight text-gray-900">
+            Shahin<span className="text-[#16a34a]">.</span>
+          </h1>
+          <p className="mt-1 text-sm text-gray-500">Sign in to the admin panel</p>
+          <div className="mx-auto mt-4 h-1 w-10 rounded-full bg-[#16a34a]" />
+        </div>
 
         {error && (
-          <div
-            style={{
-              backgroundColor: "rgba(239, 68, 68, 0.1)",
-              border: "1px solid rgba(239, 68, 68, 0.3)",
-              borderRadius: "8px",
-              padding: "0.75rem 1rem",
-              marginBottom: "1.5rem",
-              color: "#ef4444",
-              fontSize: "0.875rem",
-              textAlign: "center",
-            }}
-          >
+          <div className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-center text-sm text-red-600">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: "1.25rem" }}>
-            <label
-              htmlFor="email"
-              style={{
-                display: "block",
-                fontSize: "0.875rem",
-                fontWeight: 500,
-                color: "#9ca3af",
-                marginBottom: "0.5rem",
-              }}
-            >
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+          <div>
+            <label htmlFor="email" className="mb-1 block text-xs font-medium text-gray-600">
               Email
             </label>
             <input
@@ -118,40 +58,12 @@ export default function AdminLoginPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@example.com"
-              style={{
-                width: "100%",
-                padding: "0.75rem 1rem",
-                backgroundColor: "#0f1219",
-                border: "1px solid #2d3348",
-                borderRadius: "8px",
-                color: "#ffffff",
-                fontSize: "0.9375rem",
-                outline: "none",
-                transition: "border-color 0.2s",
-                boxSizing: "border-box",
-                fontFamily: "inherit",
-              }}
-              onFocus={(e) =>
-                (e.currentTarget.style.borderColor = "#16a34a")
-              }
-              onBlur={(e) =>
-                (e.currentTarget.style.borderColor = "#2d3348")
-              }
+              placeholder="you@example.com"
+              className={inputCls}
             />
           </div>
-
-          <div style={{ marginBottom: "1.75rem" }}>
-            <label
-              htmlFor="password"
-              style={{
-                display: "block",
-                fontSize: "0.875rem",
-                fontWeight: 500,
-                color: "#9ca3af",
-                marginBottom: "0.5rem",
-              }}
-            >
+          <div>
+            <label htmlFor="password" className="mb-1 block text-xs font-medium text-gray-600">
               Password
             </label>
             <input
@@ -160,54 +72,17 @@ export default function AdminLoginPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              style={{
-                width: "100%",
-                padding: "0.75rem 1rem",
-                backgroundColor: "#0f1219",
-                border: "1px solid #2d3348",
-                borderRadius: "8px",
-                color: "#ffffff",
-                fontSize: "0.9375rem",
-                outline: "none",
-                transition: "border-color 0.2s",
-                boxSizing: "border-box",
-                fontFamily: "inherit",
-              }}
-              onFocus={(e) =>
-                (e.currentTarget.style.borderColor = "#16a34a")
-              }
-              onBlur={(e) =>
-                (e.currentTarget.style.borderColor = "#2d3348")
-              }
+              placeholder="••••••••"
+              className={inputCls}
             />
           </div>
-
           <button
             type="submit"
             disabled={loading}
-            style={{
-              width: "100%",
-              padding: "0.75rem",
-              backgroundColor: loading ? "#15803d" : "#16a34a",
-              color: "#ffffff",
-              border: "none",
-              borderRadius: "8px",
-              fontSize: "1rem",
-              fontWeight: 600,
-              fontFamily: "var(--font-display, 'Space Grotesk', sans-serif)",
-              cursor: loading ? "not-allowed" : "pointer",
-              transition: "background-color 0.2s",
-              opacity: loading ? 0.7 : 1,
-            }}
-            onMouseEnter={(e) => {
-              if (!loading) e.currentTarget.style.backgroundColor = "#15803d";
-            }}
-            onMouseLeave={(e) => {
-              if (!loading) e.currentTarget.style.backgroundColor = "#16a34a";
-            }}
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#16a34a] py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#15803d] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {loading ? "Signing in..." : "Sign In"}
+            {loading && <Spinner className="h-4 w-4" />}
+            {loading ? "Signing in…" : "Sign In"}
           </button>
         </form>
       </div>

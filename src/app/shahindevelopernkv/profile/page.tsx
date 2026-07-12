@@ -4,6 +4,15 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, FormEvent, ChangeEvent } from "react";
 import { updateProfile, uploadPhoto } from "../actions";
+import {
+  Spinner,
+  SkeletonList,
+  Toast,
+  PrimaryButton,
+  inputCls,
+  labelCls,
+  cardCls,
+} from "@/components/admin/ui";
 
 interface ProfileData {
   name: string;
@@ -31,28 +40,6 @@ const emptyProfile: ProfileData = {
   photo: "",
 };
 
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "0.75rem 1rem",
-  backgroundColor: "#0f1219",
-  border: "1px solid #2d3348",
-  borderRadius: "8px",
-  color: "#ffffff",
-  fontSize: "0.9375rem",
-  outline: "none",
-  transition: "border-color 0.2s",
-  boxSizing: "border-box",
-  fontFamily: "inherit",
-};
-
-const labelStyle: React.CSSProperties = {
-  display: "block",
-  fontSize: "0.875rem",
-  fontWeight: 500,
-  color: "#9ca3af",
-  marginBottom: "0.5rem",
-};
-
 export default function ProfilePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -61,7 +48,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [msg, setMsg] = useState("");
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -93,15 +80,15 @@ export default function ProfilePage() {
           }
         })
         .catch(() => {
-          showToast("Failed to load profile data.", "error");
+          showToast("Failed to load profile data.");
         })
         .finally(() => setLoading(false));
     }
   }, [status]);
 
-  function showToast(message: string, type: "success" | "error") {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3000);
+  function showToast(message: string) {
+    setMsg(message);
+    setTimeout(() => setMsg(""), 3000);
   }
 
   function handleChange(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
@@ -113,9 +100,9 @@ export default function ProfilePage() {
     setSaving(true);
     try {
       await updateProfile(form);
-      showToast("Profile updated successfully.", "success");
+      showToast("Profile updated successfully.");
     } catch {
-      showToast("Failed to update profile.", "error");
+      showToast("Failed to update profile.");
     } finally {
       setSaving(false);
     }
@@ -131,25 +118,15 @@ export default function ProfilePage() {
       formData.append("file", file);
       const photoUrl = await uploadPhoto(formData);
       setForm((prev) => ({ ...prev, photo: photoUrl }));
-      showToast("Photo uploaded. Save to apply changes.", "success");
+      showToast("Photo uploaded. Save to apply changes.");
     } catch {
-      showToast("Failed to upload photo.", "error");
+      showToast("Failed to upload photo.");
     } finally {
       setUploading(false);
     }
   }
 
-  if (status === "loading" || loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-lg" style={{ color: "#6b7280" }}>
-          Loading...
-        </p>
-      </div>
-    );
-  }
-
-  if (!session) return null;
+  if (status === "unauthenticated") return null;
 
   const fields: { label: string; name: keyof ProfileData; type?: string; rows?: number }[] = [
     { label: "Name", name: "name" },
@@ -165,168 +142,97 @@ export default function ProfilePage() {
 
   return (
     <div>
-      {/* Toast */}
-      {toast && (
-        <div
-          style={{
-            position: "fixed",
-            top: "1.5rem",
-            right: "1.5rem",
-            zIndex: 100,
-            padding: "0.75rem 1.25rem",
-            borderRadius: "8px",
-            fontSize: "0.875rem",
-            fontWeight: 500,
-            color: "#fff",
-            backgroundColor: toast.type === "success" ? "#16a34a" : "#dc2626",
-            boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
-            transition: "opacity 0.3s",
-          }}
-        >
-          {toast.message}
-        </div>
-      )}
+      <Toast message={msg} />
 
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold" style={{ color: "#111827" }}>
-          Edit Profile
-        </h1>
-        <p className="mt-1 text-sm" style={{ color: "#6b7280" }}>
+        <h1 className="text-2xl font-bold text-gray-900">Edit Profile</h1>
+        <p className="mt-1 text-sm text-gray-500">
           Update your personal information, bio, and contact details.
         </p>
       </div>
 
-      <form onSubmit={handleSave}>
-        <div
-          className="rounded-xl p-6 md:p-8 mb-6"
-          style={{ backgroundColor: "#1a1f2e", boxShadow: "0 4px 24px rgba(0,0,0,0.3)" }}
-        >
-          {/* Photo section */}
-          <div className="mb-8">
-            <label style={labelStyle}>Profile Photo</label>
-            <div className="flex items-center gap-5">
-              {form.photo ? (
-                <img
-                  src={form.photo}
-                  alt="Profile"
-                  className="rounded-full object-cover"
-                  style={{
-                    width: 80,
-                    height: 80,
-                    border: "2px solid #2d3348",
-                  }}
-                />
-              ) : (
-                <div
-                  className="rounded-full flex items-center justify-center"
-                  style={{
-                    width: 80,
-                    height: 80,
-                    backgroundColor: "#0f1219",
-                    border: "2px solid #2d3348",
-                    color: "#6b7280",
-                    fontSize: "0.75rem",
-                  }}
-                >
-                  No photo
-                </div>
-              )}
-              <div>
-                <label
-                  className="inline-block cursor-pointer rounded-md px-4 py-2 text-sm font-medium transition-colors"
-                  style={{
-                    backgroundColor: "#2d3348",
-                    color: "#fff",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#3b4460";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "#2d3348";
-                  }}
-                >
-                  {uploading ? "Uploading..." : "Choose File"}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handlePhotoUpload}
-                    disabled={uploading}
+      {status === "loading" || loading ? (
+        <SkeletonList rows={3} />
+      ) : (
+        <form onSubmit={handleSave}>
+          <div className={`${cardCls} mb-6`}>
+            {/* Photo section */}
+            <div className="mb-8">
+              <label className={labelCls}>Profile Photo</label>
+              <div className="flex items-center gap-5">
+                {form.photo ? (
+                  <img
+                    src={form.photo}
+                    alt="Profile"
+                    className="h-20 w-20 rounded-full border-2 border-gray-200 object-cover"
                   />
-                </label>
-                {form.photo && (
-                  <p className="mt-2 text-xs" style={{ color: "#6b7280" }}>
-                    {form.photo}
-                  </p>
+                ) : (
+                  <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-gray-200 bg-gray-50 text-xs text-gray-400">
+                    No photo
+                  </div>
                 )}
+                <div>
+                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200">
+                    {uploading && <Spinner className="h-4 w-4" />}
+                    {uploading ? "Uploading..." : "Choose File"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handlePhotoUpload}
+                      disabled={uploading}
+                    />
+                  </label>
+                  {form.photo && (
+                    <p className="mt-2 text-xs text-gray-500">{form.photo}</p>
+                  )}
+                </div>
               </div>
+            </div>
+
+            {/* Form fields */}
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              {fields.map((field) => (
+                <div
+                  key={field.name}
+                  className={field.type === "textarea" ? "md:col-span-2" : ""}
+                >
+                  <label htmlFor={field.name} className={labelCls}>
+                    {field.label}
+                  </label>
+                  {field.type === "textarea" ? (
+                    <textarea
+                      id={field.name}
+                      name={field.name}
+                      value={form[field.name]}
+                      onChange={handleChange}
+                      rows={field.rows}
+                      className={inputCls}
+                    />
+                  ) : (
+                    <input
+                      id={field.name}
+                      name={field.name}
+                      type="text"
+                      value={form[field.name]}
+                      onChange={handleChange}
+                      className={inputCls}
+                    />
+                  )}
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Form fields */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {fields.map((field) => (
-              <div
-                key={field.name}
-                className={field.type === "textarea" ? "md:col-span-2" : ""}
-              >
-                <label htmlFor={field.name} style={labelStyle}>
-                  {field.label}
-                </label>
-                {field.type === "textarea" ? (
-                  <textarea
-                    id={field.name}
-                    name={field.name}
-                    value={form[field.name]}
-                    onChange={handleChange}
-                    rows={field.rows}
-                    style={{ ...inputStyle, resize: "vertical" }}
-                    onFocus={(e) => (e.currentTarget.style.borderColor = "#16a34a")}
-                    onBlur={(e) => (e.currentTarget.style.borderColor = "#2d3348")}
-                  />
-                ) : (
-                  <input
-                    id={field.name}
-                    name={field.name}
-                    type="text"
-                    value={form[field.name]}
-                    onChange={handleChange}
-                    style={inputStyle}
-                    onFocus={(e) => (e.currentTarget.style.borderColor = "#16a34a")}
-                    onBlur={(e) => (e.currentTarget.style.borderColor = "#2d3348")}
-                  />
-                )}
-              </div>
-            ))}
+          {/* Save button */}
+          <div className="flex justify-end">
+            <PrimaryButton type="submit" loading={saving}>
+              {saving ? "Saving..." : "Save Changes"}
+            </PrimaryButton>
           </div>
-        </div>
-
-        {/* Save button */}
-        <div className="flex justify-end">
-          <button
-            type="submit"
-            disabled={saving}
-            className="px-6 py-2.5 rounded-lg text-sm font-semibold transition-colors"
-            style={{
-              backgroundColor: saving ? "#15803d" : "#16a34a",
-              color: "#fff",
-              cursor: saving ? "not-allowed" : "pointer",
-              opacity: saving ? 0.7 : 1,
-              border: "none",
-              fontSize: "0.9375rem",
-            }}
-            onMouseEnter={(e) => {
-              if (!saving) e.currentTarget.style.backgroundColor = "#15803d";
-            }}
-            onMouseLeave={(e) => {
-              if (!saving) e.currentTarget.style.backgroundColor = "#16a34a";
-            }}
-          >
-            {saving ? "Saving..." : "Save Changes"}
-          </button>
-        </div>
-      </form>
+        </form>
+      )}
     </div>
   );
 }

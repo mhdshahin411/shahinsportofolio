@@ -4,58 +4,19 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
+import { Spinner } from "@/components/admin/ui";
 
 const sections = [
-  {
-    label: "Profile",
-    href: "/shahindevelopernkv/profile",
-    description: "Manage your personal info, bio, and social links.",
-  },
-  {
-    label: "Stats",
-    href: "/shahindevelopernkv/stats",
-    description: "Edit the About numbers (years, projects, etc.).",
-  },
-  {
-    label: "Services",
-    href: "/shahindevelopernkv/services",
-    description: "Manage the service list shown in About.",
-  },
-  {
-    label: "Experience",
-    href: "/shahindevelopernkv/experience",
-    description: "Add or edit your work experience entries.",
-  },
-  {
-    label: "Projects",
-    href: "/shahindevelopernkv/projects",
-    description: "Showcase your projects with details and images.",
-  },
-  {
-    label: "Skills",
-    href: "/shahindevelopernkv/skills",
-    description: "Update your technical and professional skills.",
-  },
-  {
-    label: "Certifications",
-    href: "/shahindevelopernkv/certifications",
-    description: "Manage your certifications and credentials.",
-  },
-  {
-    label: "Education",
-    href: "/shahindevelopernkv/education",
-    description: "Edit your educational background.",
-  },
-  {
-    label: "Resume",
-    href: "/shahindevelopernkv/resume",
-    description: "Upload and manage your resume file.",
-  },
-  {
-    label: "Photos",
-    href: "/shahindevelopernkv/photos",
-    description: "Manage gallery and profile photos.",
-  },
+  { label: "Profile", href: "/shahindevelopernkv/profile", description: "Personal info, bio, and social links.", icon: "👤" },
+  { label: "Stats", href: "/shahindevelopernkv/stats", description: "The About numbers (years, projects…).", icon: "📊" },
+  { label: "Services", href: "/shahindevelopernkv/services", description: "The service list shown in About.", icon: "🧩" },
+  { label: "Experience", href: "/shahindevelopernkv/experience", description: "Work experience entries.", icon: "💼" },
+  { label: "Projects", href: "/shahindevelopernkv/projects", description: "Projects with details and tags.", icon: "🚀" },
+  { label: "Skills", href: "/shahindevelopernkv/skills", description: "Competencies and the marquee.", icon: "⚡" },
+  { label: "Certifications", href: "/shahindevelopernkv/certifications", description: "Certifications and credentials.", icon: "🎓" },
+  { label: "Education", href: "/shahindevelopernkv/education", description: "Educational background.", icon: "📚" },
+  { label: "Resume", href: "/shahindevelopernkv/resume", description: "Professional summary text.", icon: "📄" },
+  { label: "Photos", href: "/shahindevelopernkv/photos", description: "Portrait photo.", icon: "🖼️" },
 ];
 
 export default function AdminDashboard() {
@@ -63,15 +24,13 @@ export default function AdminDashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/shahindevelopernkv/login");
-    }
+    if (status === "unauthenticated") router.push("/shahindevelopernkv/login");
   }, [status, router]);
 
   if (status === "loading") {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-lg" style={{ color: "#6b7280" }}>Loading...</p>
+      <div className="flex min-h-[60vh] items-center justify-center text-gray-400">
+        <Spinner className="h-6 w-6" />
       </div>
     );
   }
@@ -80,41 +39,31 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      {/* Welcome */}
       <div className="mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold" style={{ color: "#111827" }}>
+        <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">
           Welcome back, {session.user?.name || "Admin"}
         </h1>
-        <p className="mt-1 text-sm" style={{ color: "#6b7280" }}>
-          Manage your portfolio content from the dashboard below.
+        <p className="mt-1 text-sm text-gray-500">
+          Manage every part of your portfolio below — changes go live instantly.
         </p>
       </div>
 
-      {/* Section cards grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {sections.map((section) => (
           <Link
             key={section.href}
             href={section.href}
-            className="block rounded-lg p-5 transition-all duration-200 border-2"
-            style={{
-              backgroundColor: "#1a1f2e",
-              borderColor: "transparent",
-              color: "#fff",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "#16a34a";
-              e.currentTarget.style.transform = "translateY(-2px)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "transparent";
-              e.currentTarget.style.transform = "translateY(0)";
-            }}
+            className="group block rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-[#16a34a]/40 hover:shadow-md"
           >
-            <h3 className="text-lg font-semibold mb-2">{section.label}</h3>
-            <p className="text-sm" style={{ color: "#9ca3af" }}>
-              {section.description}
-            </p>
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-50 text-lg">
+                {section.icon}
+              </span>
+              <h3 className="text-base font-semibold text-gray-900 group-hover:text-[#16a34a]">
+                {section.label}
+              </h3>
+            </div>
+            <p className="mt-3 text-sm text-gray-500">{section.description}</p>
           </Link>
         ))}
       </div>

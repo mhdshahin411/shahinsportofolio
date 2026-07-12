@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { createProject, updateProject, deleteProject } from "../actions";
+import { Spinner, SkeletonList, Toast, PrimaryButton, inputCls, labelCls, cardCls } from "@/components/admin/ui";
 
 interface Tag { id: string; name: string }
 interface Project { id: string; title: string; category: string; accent: string; description: string; link: string; order: number; tags: Tag[] }
@@ -15,10 +16,13 @@ export default function ProjectsPage() {
   const [editing, setEditing] = useState<string | null>(null);
   const [form, setForm] = useState({ title: "", category: "", accent: "blue", description: "", link: "", tags: "" });
   const [msg, setMsg] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => { if (status === "unauthenticated") router.push("/shahindevelopernkv/login"); }, [status, router]);
 
-  const load = () => fetch("/api/admin/projects").then(r => r.json()).then(setItems);
+  const load = () => fetch("/api/admin/projects").then(r => r.json()).then(data => { setItems(data); setLoading(false); });
   useEffect(() => { if (status === "authenticated") load(); }, [status]);
 
   const startEdit = (p: Project) => {
@@ -33,21 +37,31 @@ export default function ProjectsPage() {
 
   const save = async () => {
     const tags = form.tags.split(",").map(t => t.trim()).filter(Boolean);
-    if (editing === "new") {
-      await createProject({ ...form, tags });
-    } else if (editing) {
-      await updateProject(editing, { ...form, tags });
+    setSaving(true);
+    try {
+      if (editing === "new") {
+        await createProject({ ...form, tags });
+      } else if (editing) {
+        await updateProject(editing, { ...form, tags });
+      }
+      setEditing(null);
+      setMsg("Saved!");
+      setTimeout(() => setMsg(""), 2000);
+      load();
+    } finally {
+      setSaving(false);
     }
-    setEditing(null);
-    setMsg("Saved!");
-    setTimeout(() => setMsg(""), 2000);
-    load();
   };
 
   const remove = async (id: string) => {
     if (!confirm("Delete this project?")) return;
-    await deleteProject(id);
-    load();
+    setDeletingId(id);
+    try {
+      await deleteProject(id);
+      load();
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   if (status !== "authenticated") return null;
@@ -55,66 +69,75 @@ export default function ProjectsPage() {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-[#0f1219]">Projects</h1>
-        <button onClick={startNew} className="rounded-lg bg-[#16a34a] px-4 py-2 text-sm font-medium text-white hover:bg-[#15803d]">+ Add</button>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Projects</h1>
+          <p className="text-sm text-gray-500">Manage your portfolio projects.</p>
+        </div>
+        <PrimaryButton onClick={startNew}>+ Add</PrimaryButton>
       </div>
-      {msg && <div className="mb-4 rounded-lg bg-[#16a34a]/10 px-4 py-2 text-sm text-[#16a34a]">{msg}</div>}
+      <Toast message={msg} />
 
       {editing && (
-        <div className="mb-6 rounded-2xl bg-[#1a1f2e] p-6">
+        <div className={`mb-6 ${cardCls}`}>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs text-gray-400">Title</label>
-              <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} className="w-full rounded-lg border border-transparent bg-[#0f1219] px-3 py-2 text-sm text-white focus:border-[#16a34a] focus:outline-none" />
+              <label className={labelCls}>Title</label>
+              <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} className={inputCls} />
             </div>
             <div>
-              <label className="mb-1 block text-xs text-gray-400">Category</label>
-              <input value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} className="w-full rounded-lg border border-transparent bg-[#0f1219] px-3 py-2 text-sm text-white focus:border-[#16a34a] focus:outline-none" />
+              <label className={labelCls}>Category</label>
+              <input value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} className={inputCls} />
             </div>
             <div>
-              <label className="mb-1 block text-xs text-gray-400">Accent</label>
-              <select value={form.accent} onChange={e => setForm(f => ({ ...f, accent: e.target.value }))} className="w-full rounded-lg border border-transparent bg-[#0f1219] px-3 py-2 text-sm text-white focus:border-[#16a34a] focus:outline-none">
+              <label className={labelCls}>Accent</label>
+              <select value={form.accent} onChange={e => setForm(f => ({ ...f, accent: e.target.value }))} className={inputCls}>
                 <option value="blue">Blue</option>
                 <option value="green">Green</option>
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs text-gray-400">Link</label>
-              <input value={form.link} onChange={e => setForm(f => ({ ...f, link: e.target.value }))} className="w-full rounded-lg border border-transparent bg-[#0f1219] px-3 py-2 text-sm text-white focus:border-[#16a34a] focus:outline-none" />
+              <label className={labelCls}>Link</label>
+              <input value={form.link} onChange={e => setForm(f => ({ ...f, link: e.target.value }))} className={inputCls} />
             </div>
           </div>
           <div className="mt-4">
-            <label className="mb-1 block text-xs text-gray-400">Description</label>
-            <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3} className="w-full rounded-lg border border-transparent bg-[#0f1219] px-3 py-2 text-sm text-white focus:border-[#16a34a] focus:outline-none" />
+            <label className={labelCls}>Description</label>
+            <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3} className={inputCls} />
           </div>
           <div className="mt-4">
-            <label className="mb-1 block text-xs text-gray-400">Tags (comma-separated)</label>
-            <input value={form.tags} onChange={e => setForm(f => ({ ...f, tags: e.target.value }))} className="w-full rounded-lg border border-transparent bg-[#0f1219] px-3 py-2 text-sm text-white focus:border-[#16a34a] focus:outline-none" />
+            <label className={labelCls}>Tags (comma-separated)</label>
+            <input value={form.tags} onChange={e => setForm(f => ({ ...f, tags: e.target.value }))} className={inputCls} />
           </div>
           <div className="mt-4 flex gap-3">
-            <button onClick={save} className="rounded-lg bg-[#16a34a] px-4 py-2 text-sm font-medium text-white hover:bg-[#15803d]">Save</button>
-            <button onClick={() => setEditing(null)} className="rounded-lg bg-gray-600 px-4 py-2 text-sm text-white hover:bg-gray-500">Cancel</button>
+            <PrimaryButton loading={saving} onClick={save}>Save</PrimaryButton>
+            <button onClick={() => setEditing(null)} className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200">Cancel</button>
           </div>
         </div>
       )}
 
-      <div className="space-y-3">
-        {items.map(p => (
-          <div key={p.id} className="rounded-2xl bg-[#1a1f2e] p-5">
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="font-semibold text-white">{p.title}</h3>
-                <p className="text-sm text-gray-400">{p.category}</p>
-                <p className="mt-1 text-xs text-gray-500">{p.tags.map(t => t.name).join(", ")}</p>
-              </div>
-              <div className="flex gap-2">
-                <button onClick={() => startEdit(p)} className="rounded-lg bg-[#252a3a] px-3 py-1.5 text-xs text-gray-300 hover:bg-[#16a34a] hover:text-white">Edit</button>
-                <button onClick={() => remove(p.id)} className="rounded-lg bg-[#252a3a] px-3 py-1.5 text-xs text-gray-300 hover:bg-red-600 hover:text-white">Delete</button>
+      {loading ? (
+        <SkeletonList rows={4} />
+      ) : (
+        <div className="space-y-3">
+          {items.map(p => (
+            <div key={p.id} className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="font-semibold text-gray-900">{p.title}</h3>
+                  <p className="text-sm text-gray-500">{p.category}</p>
+                  <p className="mt-1 text-xs text-gray-500">{p.tags.map(t => t.name).join(", ")}</p>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => startEdit(p)} className="rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200">Edit</button>
+                  <button onClick={() => remove(p.id)} disabled={deletingId === p.id} className="inline-flex items-center rounded-lg px-3 py-1.5 text-xs font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 disabled:opacity-50">
+                    {deletingId === p.id ? <Spinner className="h-3.5 w-3.5" /> : "Delete"}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

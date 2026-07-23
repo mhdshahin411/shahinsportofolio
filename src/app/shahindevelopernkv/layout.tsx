@@ -9,6 +9,7 @@ import AdminPWA from "@/components/admin/AdminPWA";
 const navLinks = [
   { label: "Dashboard", href: "/shahindevelopernkv" },
   { label: "Profile", href: "/shahindevelopernkv/profile" },
+  { label: "Site Content", href: "/shahindevelopernkv/content" },
   { label: "Stats", href: "/shahindevelopernkv/stats" },
   { label: "Services", href: "/shahindevelopernkv/services" },
   { label: "Experience", href: "/shahindevelopernkv/experience" },

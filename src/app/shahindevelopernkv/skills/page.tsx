@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { createCompetency, updateCompetency, deleteCompetency, updateMarqueeSkills } from "../actions";
 import { Spinner, SkeletonList, Toast, PrimaryButton, inputCls, labelCls, cardCls } from "@/components/admin/ui";
 
-interface Skill { id: string; name: string }
+interface Skill { id: string; name: string; description: string }
 interface Competency { id: string; title: string; accent: string; order: number; skills: Skill[] }
 interface Marquee { id: string; name: string }
 
@@ -38,14 +38,19 @@ export default function SkillsPage() {
 
   const startEdit = (c: Competency) => {
     setEditing(c.id);
-    setForm({ title: c.title, accent: c.accent, skills: c.skills.map(s => s.name).join("\n") });
+    setForm({ title: c.title, accent: c.accent, skills: c.skills.map(s => (s.description ? `${s.name} | ${s.description}` : s.name)).join("\n") });
   };
   const startNew = () => { setEditing("new"); setForm({ title: "", accent: "blue", skills: "" }); };
 
   const save = async () => {
     setSaving(true);
     try {
-      const skills = form.skills.split("\n").map(s => s.trim()).filter(Boolean);
+      const skills = form.skills.split("\n").map(l => l.trim()).filter(Boolean).map(line => {
+        const idx = line.indexOf("|");
+        return idx === -1
+          ? { name: line.trim(), description: "" }
+          : { name: line.slice(0, idx).trim(), description: line.slice(idx + 1).trim() };
+      });
       if (editing === "new") await createCompetency({ ...form, skills });
       else if (editing) await updateCompetency(editing, { ...form, skills });
       setEditing(null);
@@ -106,8 +111,9 @@ export default function SkillsPage() {
             </div>
           </div>
           <div className="mt-4">
-            <label className={labelCls}>Skills (one per line)</label>
-            <textarea value={form.skills} onChange={e => setForm(f => ({ ...f, skills: e.target.value }))} rows={6} className={inputCls} />
+            <label className={labelCls}>Skills — one per line, format: Name | Description</label>
+            <textarea value={form.skills} onChange={e => setForm(f => ({ ...f, skills: e.target.value }))} rows={8} className={inputCls} placeholder={"Power BI | Interactive dashboards and DAX reporting.\nReactJS | Component-based UI and SPA development."} />
+            <p className="mt-1 text-xs text-gray-400">The text after &quot;|&quot; is the short description shown under each skill card. Omit &quot;|&quot; for no description.</p>
           </div>
           <div className="mt-4 flex gap-3">
             <PrimaryButton loading={saving} onClick={save}>Save</PrimaryButton>

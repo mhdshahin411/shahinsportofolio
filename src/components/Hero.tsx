@@ -38,7 +38,7 @@ interface ProfileData {
   role: string;
 }
 
-export default function Hero({ profile }: { profile: ProfileData }) {
+export default function Hero({ profile, tagline }: { profile: ProfileData; tagline: string }) {
   const year = 2020;
   const initials = profile.name
     .split(/\s+/)
@@ -103,8 +103,8 @@ export default function Hero({ profile }: { profile: ProfileData }) {
           <p className="mono flex max-w-[16rem] gap-2 text-[0.7rem] uppercase leading-relaxed tracking-wide text-white/85">
             <span className="mt-0.5 text-white">●</span>
             <span>
-              I build Dynamics 365 CRM solutions and full-stack web &amp; mobile
-              apps that are simple, smart and impactful.
+              {tagline ||
+                "I build Dynamics 365 CRM solutions and full-stack web & mobile apps that are simple, smart and impactful."}
             </span>
           </p>
 
@@ -148,7 +148,7 @@ export default function Hero({ profile }: { profile: ProfileData }) {
               <p className="font-[family-name:var(--font-display)] font-semibold leading-tight">
                 Shahin
               </p>
-              <p className="text-xs text-white/60">Freelance Full-Stack Dev</p>
+              <p className="text-xs text-white/60">{profile.role || "Freelance Full-Stack Dev"}</p>
             </div>
             <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 transition-colors group-hover:border-accent group-hover:text-accent">
               <ArrowIcon width={16} height={16} className="-rotate-45" />

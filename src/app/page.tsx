@@ -14,6 +14,7 @@ import {
   getServices,
   getStats,
   getCompetencies,
+  getSiteContent,
 } from "@/lib/db-data";
 
 function SectionHead({
@@ -51,7 +52,7 @@ function SectionHead({
 export const revalidate = 3600;
 
 export default async function Home() {
-  const [profile, marqueeSkillsRaw, certifications, projects, servicesRaw, stats, competenciesRaw] =
+  const [profile, marqueeSkillsRaw, certifications, projects, servicesRaw, stats, competenciesRaw, content] =
     await Promise.all([
       getProfile(),
       getMarqueeSkills(),
@@ -60,13 +61,14 @@ export default async function Home() {
       getServices(),
       getStats(),
       getCompetencies(),
+      getSiteContent(),
     ]);
 
   const marqueeSkills = marqueeSkillsRaw.map((m) => m.name);
   const services = servicesRaw.map((s) => s.name);
   const competencies = competenciesRaw.map((c) => ({
     ...c,
-    skills: c.skills.map((s) => s.name),
+    skills: c.skills.map((s) => ({ name: s.name, description: s.description })),
   }));
   const featuredProjects = projects.slice(0, 2).map((p) => ({
     ...p,
@@ -76,7 +78,7 @@ export default async function Home() {
     <>
       <Navbar />
       <main>
-        <Hero profile={profile} />
+        <Hero profile={profile} tagline={content.heroTagline ?? ""} />
 
         {/* Marquee */}
         <div className="relative overflow-hidden border-y border-white/30 bg-white/30 py-5 backdrop-blur-md">
@@ -172,7 +174,7 @@ export default async function Home() {
                     <span className="kicker">Selected Work</span>
                   </div>
                   <h2 className="mt-5 max-w-md font-[family-name:var(--font-display)] text-4xl font-bold leading-[1.02] tracking-tight sm:text-5xl">
-                    Take a look at the latest projects I&apos;ve done
+                    {content.workHeading || "Take a look at the latest projects I've done"}
                   </h2>
                   <a
                     href="/work"
@@ -347,13 +349,18 @@ export default async function Home() {
                 <span className="kicker">Contact</span>
               </div>
               <h2 className="mt-8 font-[family-name:var(--font-display)] text-[clamp(2.5rem,8vw,7rem)] font-bold leading-[0.9] tracking-tight">
-                Let&apos;s build
-                <br />
-                something<span className="text-accent">.</span>
+                {(content.contactHeading || "Let's build\nsomething")
+                  .split("\n")
+                  .map((line, i, arr) => (
+                    <span key={i}>
+                      {line}
+                      {i < arr.length - 1 ? <br /> : <span className="text-accent">.</span>}
+                    </span>
+                  ))}
               </h2>
               <p className="mt-8 max-w-lg text-lg leading-relaxed text-muted">
-                Open to freelance full-stack and Dynamics 365 / Power Platform
-                work. I usually reply within a day.
+                {content.contactText ||
+                  "Open to freelance full-stack and Dynamics 365 / Power Platform work. I usually reply within a day."}
               </p>
 
               <div className="mt-12 flex flex-wrap items-center gap-4">

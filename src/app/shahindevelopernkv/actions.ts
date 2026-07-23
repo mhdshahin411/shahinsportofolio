@@ -194,9 +194,11 @@ export async function getCompetenciesAction() {
   });
 }
 
+type SkillInput = { name: string; description: string };
+
 export async function updateCompetency(
   id: string,
-  data: { title: string; accent: string; skills: string[] }
+  data: { title: string; accent: string; skills: SkillInput[] }
 ) {
   await requireAuth();
   const { skills, ...competencyData } = data;
@@ -208,7 +210,7 @@ export async function updateCompetency(
     data: {
       ...competencyData,
       skills: {
-        create: skills.map((name, i) => ({ name, order: i })),
+        create: skills.map((s, i) => ({ name: s.name, description: s.description, order: i })),
       },
     },
     include: { skills: true },
@@ -221,7 +223,7 @@ export async function updateCompetency(
 export async function createCompetency(data: {
   title: string;
   accent: string;
-  skills: string[];
+  skills: SkillInput[];
 }) {
   await requireAuth();
   const { skills, ...competencyData } = data;
@@ -233,7 +235,7 @@ export async function createCompetency(data: {
       ...competencyData,
       order: nextOrder,
       skills: {
-        create: skills.map((name, i) => ({ name, order: i })),
+        create: skills.map((s, i) => ({ name: s.name, description: s.description, order: i })),
       },
     },
     include: { skills: true },
@@ -426,6 +428,26 @@ export async function updateResumeSummary(text: string) {
     update: { text },
     create: { id: "main", text },
   });
+  revalidate();
+}
+
+// ─── Site Content (section copy) ─────────────────────────────────────────────
+
+export async function getSiteContentAction() {
+  await requireAuth();
+  const rows = await prisma.siteContent.findMany();
+  return Object.fromEntries(rows.map((r) => [r.key, r.value])) as Record<string, string>;
+}
+
+export async function updateSiteContent(content: Record<string, string>) {
+  await requireAuth();
+  for (const [key, value] of Object.entries(content)) {
+    await prisma.siteContent.upsert({
+      where: { key },
+      update: { value },
+      create: { key, value },
+    });
+  }
   revalidate();
 }
 

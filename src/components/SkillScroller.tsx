@@ -26,40 +26,9 @@ const groupColors: Record<string, { dot: string; iconBg: string; line: string }>
   },
 };
 
-const skillDescriptions: Record<string, string> = {
-  "Microsoft Dynamics 365 CRM": "End-to-end CRM customization and plugin development.",
-  "Dataverse": "Data modeling, security roles, and business rules.",
-  "Power Pages": "Customer portals with Liquid and JavaScript.",
-  "Power Automate": "Cloud flows and business process automation.",
-  "Power BI": "Interactive dashboards and DAX reporting.",
-  "Power Platform": "Low-code solutions across the platform suite.",
-  "Ribbon Workbench": "Custom ribbon commands and UI modifications.",
-  "XrmToolBox": "CRM administration and data migration tooling.",
-  "Azure Functions (C#)": "Serverless middleware and API integrations.",
-  "Azure Key Vault": "Secure secret and certificate management.",
-  "REST APIs": "RESTful service design, integration, and testing.",
-  "DocuSign Integration": "Contract signing automation via APIs.",
-  "eSignature (Emsign)": "Digital signature workflow integration.",
-  "OAuth2 / SSO": "Secure authentication and single sign-on.",
-  "Flutter (iOS & Android)": "Cross-platform mobile app development.",
-  "JavaScript": "Client-side scripting and DOM manipulation.",
-  "Liquid Templates": "Dynamic templating for Power Pages portals.",
-  "C#": "Backend development and Azure Functions.",
-  "ReactJS": "Component-based UI and SPA development.",
-  "Node.js": "Server-side JavaScript and REST APIs.",
-  "SQL": "Database queries, stored procedures, and optimization.",
-  "MongoDB": "NoSQL document database design and queries.",
-  "Git": "Version control, branching, and collaboration.",
-  "Requirements Analysis": "Gathering and documenting business needs.",
-  "UAT": "User acceptance testing and validation.",
-  "System Integration": "Connecting systems and data flows.",
-  "DEV-to-UAT Migration": "Environment migration and deployment.",
-  "Functional Consulting": "Bridging business needs with technical solutions.",
-};
-
 interface CompetencyProp {
   title: string;
-  skills: string[];
+  skills: { name: string; description: string }[];
 }
 
 export default function SkillScroller({ competencies }: { competencies: CompetencyProp[] }) {
@@ -98,7 +67,8 @@ export default function SkillScroller({ competencies }: { competencies: Competen
       line: "bg-gray-400",
     };
     return c.skills.map((s) => ({
-      skill: s,
+      skill: s.name,
+      description: s.description,
       groupTitle: c.title,
       colors,
     }));
@@ -139,7 +109,7 @@ export default function SkillScroller({ competencies }: { competencies: Competen
       >
         {allCards.map((card) => {
           const Icon = skillIconMap[card.skill];
-          const desc = skillDescriptions[card.skill] ?? card.groupTitle;
+          const desc = card.description || card.groupTitle;
           return (
             <div
               key={card.skill}

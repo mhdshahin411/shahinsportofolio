@@ -8,6 +8,7 @@ import { Spinner } from "@/components/admin/ui";
 
 const sections = [
   { label: "Profile", href: "/shahindevelopernkv/profile", description: "Personal info, bio, and social links.", icon: "👤" },
+  { label: "Site Content", href: "/shahindevelopernkv/content", description: "Hero, work & contact section copy.", icon: "✍️" },
   { label: "Stats", href: "/shahindevelopernkv/stats", description: "The About numbers (years, projects…).", icon: "📊" },
   { label: "Services", href: "/shahindevelopernkv/services", description: "The service list shown in About.", icon: "🧩" },
   { label: "Experience", href: "/shahindevelopernkv/experience", description: "Work experience entries.", icon: "💼" },

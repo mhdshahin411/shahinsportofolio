@@ -53,6 +53,7 @@ model Competency {
 model Skill {
   id           String     @id @default(cuid())
   name         String
+  description  String     @default("")
   order        Int        @default(0)
   competency   Competency @relation(fields: [competencyId], references: [id], onDelete: Cascade)
   competencyId String
@@ -121,4 +122,9 @@ model MarqueeSkill {
 model ResumeSummary {
   id   String @id @default("main")
   text String @default("")
+}
+
+model SiteContent {
+  key   String @id
+  value String @default("")
 }
